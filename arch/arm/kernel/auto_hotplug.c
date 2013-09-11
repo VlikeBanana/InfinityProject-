@@ -563,9 +563,10 @@ static void auto_hotplug_early_suspend(struct early_suspend *handler)
 		pr_info("auto_hotplug: Offlining CPUs for early suspend\n");
 		schedule_work_on(0, &hotplug_offline_all_work);
 	}
-	
+
+	/* set max suspend frequency */
 	msm_cpufreq_set_freq_limits(0, MSM_CPUFREQ_NO_LIMIT, suspend_frequency);
-      	pr_info("Cpulimit: Early suspend - limit max frequency to: %d\n", suspend_frequency);
+	pr_info("cpulimit: early suspend - limit max frequency to: %d\n", suspend_frequency);
 }
 
 static void auto_hotplug_late_resume(struct early_suspend *handler)
@@ -576,14 +577,15 @@ static void auto_hotplug_late_resume(struct early_suspend *handler)
 		pr_info("auto_hotplug: late resume handler\n");
 
 	flags &= ~EARLYSUSPEND_ACTIVE;
-
-	msm_cpufreq_set_freq_limits(0, MSM_CPUFREQ_NO_LIMIT, MSM_CPUFREQ_NO_LIMIT);
-       	pr_info("Cpulimit: Late resume - restore max frequency.\n");
-
+	
 	//stack the deck, let's get moving again
 	for (i=0; i<5; i++) {
 		history[i] = 500;
 	}
+
+	/* restore max frequency */
+	msm_cpufreq_set_freq_limits(0, MSM_CPUFREQ_NO_LIMIT, MSM_CPUFREQ_NO_LIMIT);
+	pr_info("cpulimit: late resume - restore cpu max frequency.\n");
 
 	schedule_work(&hotplug_online_all_work);
 }
